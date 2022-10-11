@@ -1,10 +1,55 @@
-import Foundation
+import SwiftUI
 
-struct TwitsStorge {
-    private(set) var twits: [Twit] = [
-        Twit(id: "1", userName: "Dima", twitText: "Bla bla bla"),
-        Twit(id: "2", userName: "Dima1", twitText: "Bla bla bla1"),
-        Twit(id: "3", userName: "Dima2", twitText: "Bla bla bla2"),
-        Twit(id: "4", userName: "Dima3", twitText: "Bla bla bla3")
+final class TwitsStorge: Decodable, ObservableObject {
+    @Published var twits: [Twit] = []
+
+    var baseURLString = "https://api.twitter.com/2/tweets/search/recent"
+    var bearerToken = "AAAAAAAAAAAAAAAAAAAAANU0iAEAAAAAYsEzi7qN4ePnKtIBcvtLxhdV9Yg%3Dd7yJp1S2pClfJNTs6baLnAm6X7qntTgLaw6DXNlafsTDdYsUo6"
+    var baseParams = [
+        "query": "from: ZelenskyyUa"
     ]
+
+    func fetchContents() {
+        guard var urlComponents = URLComponents(string: baseURLString) else { return }
+        urlComponents.setQueryItems(with: baseParams)
+        guard let contentsURL = urlComponents.url else { return }
+        var request = URLRequest(url: contentsURL)
+        request.httpMethod = "GET"
+        request.addValue("Bearer " + bearerToken, forHTTPHeaderField: "Authorization")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data,
+               let response = response as? HTTPURLResponse {
+                print(response.statusCode)
+                if let decodedResponse = try? JSONDecoder().decode(TwitsStorge.self, from: data) {
+                    DispatchQueue.main.async {
+                        self.twits = decodedResponse.twits
+                    }
+                    return
+                }
+            }
+            print(
+                "Contents fetch failed: " +
+                "\(error?.localizedDescription ?? "Unknown error")")
+        }
+        .resume()
+    }
+
+    init() {
+        fetchContents()
+    }
+
+    //MARK: Decoding TwitsStorage
+
+    enum CodinKeys: String, CodingKey {
+        case twits = "data"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodinKeys.self)
+        twits = try container.decode([Twit].self, forKey: .twits)
+    }
+
 }
+
+

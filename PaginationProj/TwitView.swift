@@ -6,7 +6,7 @@ struct TwitView: View {
 
     var body: some View {
         VStack {
-            Text(twit.userName)
+            Text(twit.id)
                 .font(.headline)
             Text(twit.twitText)
                 .font(.subheadline)
@@ -16,6 +16,6 @@ struct TwitView: View {
 
 struct TwitView_Previews: PreviewProvider {
     static var previews: some View {
-        TwitView(twit: Twit(id: "1", userName: "dfs", twitText: "dfsdf"))
+        TwitView(twit: Twit(id: "1", twitText: "dfsdf"))
     }
 }

@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct TwitsListView: View {
-    @StateObject private var twitsModel = TwitsViewModel()
+    @StateObject private var storage = TwitsStorge()
 
     var body: some View {
         NavigationView {
             ScrollView {
                 LazyVStack {
-                    ForEach(twitsModel.twitStorage.twits) { twit in
+                    ForEach(storage.twits) { twit in
                         TwitView(twit: twit)
                     }
                 }

@@ -1,6 +1,5 @@
 import Foundation
 
-class TwitsViewModel: ObservableObject {
-    @Published var twitStorage = TwitsStorge()
-
-}
+//class TwitsViewModel: ObservableObject {
+//    @Published var twitsStorage = TwitsStorge()
+//}
