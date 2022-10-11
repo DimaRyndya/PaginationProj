@@ -13,6 +13,7 @@ struct TwitView: View {
             Text(twit.twitText)
                 .font(.subheadline)
         }
+        .padding()
     }
 }
 

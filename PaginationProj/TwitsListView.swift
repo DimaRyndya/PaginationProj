@@ -4,6 +4,9 @@ struct TwitsListView: View {
     @StateObject private var storage = TwitsStorge()
 
     var body: some View {
+        if storage.isLoadingPage {
+            ActivityIndicatorView()
+        }
         NavigationView {
             ScrollView {
                 LazyVStack {

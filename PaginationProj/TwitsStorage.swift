@@ -2,14 +2,28 @@ import SwiftUI
 
 final class TwitsStorge: Decodable, ObservableObject {
     @Published var twits: [Twit] = []
+    @Published var isLoadingPage = false
 
     var baseURLString = "https://api.twitter.com/2/tweets/search/recent"
     var bearerToken = "AAAAAAAAAAAAAAAAAAAAANU0iAEAAAAAYsEzi7qN4ePnKtIBcvtLxhdV9Yg%3Dd7yJp1S2pClfJNTs6baLnAm6X7qntTgLaw6DXNlafsTDdYsUo6"
     var baseParams = [
         "query": "from: ZelenskyyUa"
     ]
+    var nextToken = ""
+
+
+    func loadNextPage() {
+        if nextToken != "" {
+            baseParams["pagination_token"] = nextToken
+        }
+        fetchContents()
+    }
+
+    //MARK: Paggination
+
 
     func fetchContents() {
+        isLoadingPage = true
         guard var urlComponents = URLComponents(string: baseURLString) else { return }
         urlComponents.setQueryItems(with: baseParams)
         guard let contentsURL = urlComponents.url else { return }
@@ -24,6 +38,9 @@ final class TwitsStorge: Decodable, ObservableObject {
                 if let decodedResponse = try? JSONDecoder().decode(TwitsStorge.self, from: data) {
                     DispatchQueue.main.async {
                         self.twits = decodedResponse.twits
+                        self.nextToken = decodedResponse.nextToken
+                        print(self.nextToken)
+                        self.isLoadingPage = false
                     }
                     return
                 }
@@ -41,13 +58,20 @@ final class TwitsStorge: Decodable, ObservableObject {
 
     //MARK: Decoding TwitsStorage
 
-    enum CodinKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case twits = "data"
+        case meta
+    }
+
+    enum MetaKeys: String, CodingKey {
+        case nextToken = "next_token"
     }
 
     init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodinKeys.self)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         twits = try container.decode([Twit].self, forKey: .twits)
+        let metaContainer = try container.nestedContainer(keyedBy: MetaKeys.self, forKey: .meta)
+        nextToken = try metaContainer.decode(String.self, forKey: .nextToken)
     }
 
 }
