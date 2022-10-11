@@ -6,6 +6,8 @@ struct TwitView: View {
 
     var body: some View {
         VStack {
+            Text(twit.userName)
+                .font(.largeTitle)
             Text(twit.id)
                 .font(.headline)
             Text(twit.twitText)

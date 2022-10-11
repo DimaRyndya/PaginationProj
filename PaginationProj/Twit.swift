@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct Twit: Identifiable, Hashable {
+    let userName = "@ZelenskyyUa"
     let id: String
     let twitText: String
 }
