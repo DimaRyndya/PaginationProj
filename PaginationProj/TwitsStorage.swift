@@ -2,7 +2,7 @@ import SwiftUI
 
 final class TwitsStorge: Decodable, ObservableObject {
     @Published var twits: [Twit] = []
-    @Published var isLoadingPage = false
+//    @Published var isLoadingPage = false
 
     var baseURLString = "https://api.twitter.com/2/tweets/search/recent"
     var bearerToken = "AAAAAAAAAAAAAAAAAAAAANU0iAEAAAAAYsEzi7qN4ePnKtIBcvtLxhdV9Yg%3Dd7yJp1S2pClfJNTs6baLnAm6X7qntTgLaw6DXNlafsTDdYsUo6"
@@ -10,20 +10,22 @@ final class TwitsStorge: Decodable, ObservableObject {
         "query": "from: ZelenskyyUa"
     ]
     var nextToken = ""
+    var maxResults = 10
+    var page = 0
+    var offset: Int { page * maxResults }
 
 
     func loadNextPage() {
-        if nextToken != "" {
+        if twits.count <= offset {
             baseParams["pagination_token"] = nextToken
+            baseParams["max_results"] = String(maxResults)
+            fetchContents()
         }
-        fetchContents()
     }
 
     //MARK: Paggination
 
-
     func fetchContents() {
-        isLoadingPage = true
         guard var urlComponents = URLComponents(string: baseURLString) else { return }
         urlComponents.setQueryItems(with: baseParams)
         guard let contentsURL = urlComponents.url else { return }
@@ -37,10 +39,11 @@ final class TwitsStorge: Decodable, ObservableObject {
                 print(response.statusCode)
                 if let decodedResponse = try? JSONDecoder().decode(TwitsStorge.self, from: data) {
                     DispatchQueue.main.async {
-                        self.twits = decodedResponse.twits
-                        self.nextToken = decodedResponse.nextToken
-                        print(self.nextToken)
-                        self.isLoadingPage = false
+                        self.twits += decodedResponse.twits
+                        if self.page != 0 {
+                            self.nextToken = decodedResponse.nextToken
+                        }
+                        self.page += 1
                     }
                     return
                 }
