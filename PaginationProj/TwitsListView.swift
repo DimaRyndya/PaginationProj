@@ -4,8 +4,12 @@ struct TwitsListView: View {
     @EnvironmentObject var storage: TwitsStorge
 
     var body: some View {
+
         NavigationView {
             List {
+                if storage.page == 0 {
+                    ActivityIndicatorView()
+                }
                 ForEach(storage.twits) { twit in
                     TwitView(twit: twit)
                 }
