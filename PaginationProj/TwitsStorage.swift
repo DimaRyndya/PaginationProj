@@ -2,7 +2,7 @@ import SwiftUI
 
 final class TwitsStorge: Decodable, ObservableObject {
     @Published var twits: [Twit] = []
-//    @Published var isLoadingPage = false
+    //    @Published var isLoadingPage = false
 
     var baseURLString = "https://api.twitter.com/2/tweets/search/recent"
     var bearerToken = "AAAAAAAAAAAAAAAAAAAAANU0iAEAAAAAYsEzi7qN4ePnKtIBcvtLxhdV9Yg%3Dd7yJp1S2pClfJNTs6baLnAm6X7qntTgLaw6DXNlafsTDdYsUo6"
@@ -10,16 +10,18 @@ final class TwitsStorge: Decodable, ObservableObject {
         "query": "from: ZelenskyyUa"
     ]
     var nextToken = ""
-    var maxResults = 10
+    var maxResults = "10"
     var page = 0
-    var offset: Int { page * maxResults }
+    var offset: Int { page * (Int(maxResults) ?? 0) }
 
 
     func loadNextPage() {
         if twits.count <= offset {
             baseParams["pagination_token"] = nextToken
-            baseParams["max_results"] = String(maxResults)
+            baseParams["max_results"] = maxResults
             fetchContents()
+        } else {
+            print("Error")
         }
     }
 
@@ -40,9 +42,7 @@ final class TwitsStorge: Decodable, ObservableObject {
                 if let decodedResponse = try? JSONDecoder().decode(TwitsStorge.self, from: data) {
                     DispatchQueue.main.async {
                         self.twits += decodedResponse.twits
-                        if self.page != 0 {
-                            self.nextToken = decodedResponse.nextToken
-                        }
+                        self.nextToken = decodedResponse.nextToken
                         self.page += 1
                     }
                     return

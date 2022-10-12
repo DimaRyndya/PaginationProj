@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TwitsListView: View {
-    @StateObject private var storage = TwitsStorge()
+    @EnvironmentObject var storage: TwitsStorge
 
     var body: some View {
         NavigationView {
@@ -9,10 +9,12 @@ struct TwitsListView: View {
                 ForEach(storage.twits) { twit in
                     TwitView(twit: twit)
                 }
-                ActivityIndicatorView()
-                    .onAppear {
-                        storage.loadNextPage()
-                    }
+                if storage.page != 0 {
+                    ActivityIndicatorView()
+                        .onAppear {
+                            storage.loadNextPage()
+                        }
+                }
             }
             .navigationTitle("Twits")
         }
@@ -22,5 +24,6 @@ struct TwitsListView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         TwitsListView()
+            .environmentObject(TwitsStorge())
     }
 }
