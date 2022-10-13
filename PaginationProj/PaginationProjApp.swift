@@ -2,12 +2,12 @@ import SwiftUI
 
 @main
 struct PaginationProjApp: App {
-    @StateObject private var storage = TwitsStorge()
+    @StateObject private var twitsModel = TwitsModel()
 
     var body: some Scene {
         WindowGroup {
             TwitsListView()
-                .environmentObject(storage)
+                .environmentObject(twitsModel)
         }
     }
 }

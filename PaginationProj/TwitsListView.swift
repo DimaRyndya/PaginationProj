@@ -1,22 +1,22 @@
 import SwiftUI
 
 struct TwitsListView: View {
-    @EnvironmentObject var storage: TwitsStorge
+    @EnvironmentObject var twitsModel: TwitsModel
 
     var body: some View {
 
         NavigationView {
             List {
-                if storage.page == 0 {
+                if twitsModel.page == 0 {
                     ActivityIndicatorView()
                 }
-                ForEach(storage.twits) { twit in
+                ForEach(twitsModel.twitsStorage.twits) { twit in
                     TwitView(twit: twit)
                 }
-                if storage.page != 0 {
+                if twitsModel.page != 0 {
                     ActivityIndicatorView()
                         .onAppear {
-                            storage.loadNextPage()
+                            twitsModel.loadNextPage()
                         }
                 }
             }
@@ -28,6 +28,6 @@ struct TwitsListView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         TwitsListView()
-            .environmentObject(TwitsStorge())
+            .environmentObject(TwitsModel())
     }
 }
