@@ -4,7 +4,6 @@ final class TwitsModel: ObservableObject, Decodable {
 
     enum NetworkFailure: Error {
         case decodeError
-        case fatchingError
     }
 
     @Published var twits: [Twit] = []
@@ -17,26 +16,19 @@ final class TwitsModel: ObservableObject, Decodable {
         "query": "from: ZelenskyyUa"
     ]
     var nextToken = ""
-    
     var maxResults = "10"
-    var page = 0
-    var offset: Int { page * (Int(maxResults) ?? 0) }
-
 
     func loadNextPage() {
-            fetchTwits() { result in
-                switch result {
-                case .success(let storage):
-                    if self.twits.count <= self.offset {
-                        self.baseParams["pagination_token"] = self.nextToken
-                        self.baseParams["max_results"] = self.maxResults
-                        self.twits += storage.twits
-                        self.page += 1
-                        self.nextToken = storage.nextToken
-                    }
-                case .failure(let error):
-                    print("\(error)")
-                    self.isLoading = false
+        fetchTwits() { result in
+            switch result {
+            case .success(let storage):
+                self.baseParams["pagination_token"] = self.nextToken
+                self.baseParams["max_results"] = self.maxResults
+                self.twits += storage.twits
+                self.nextToken = storage.nextToken
+            case .failure(let error):
+                print("\(error)")
+                self.isLoading = false
             }
         }
     }
@@ -75,7 +67,6 @@ final class TwitsModel: ObservableObject, Decodable {
             switch result {
             case .success(let storage):
                 self?.twits = storage.twits
-                self?.page += 1
                 self?.nextToken = storage.nextToken
                 self?.isLoading = true
             case .failure(let error):

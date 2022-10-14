@@ -7,7 +7,7 @@ struct TwitsListView: View {
 
         NavigationView {
             List {
-                if twitsModel.page == 0 {
+                if twitsModel.twits.isEmpty {
                     ActivityIndicatorView()
                 }
                 ForEach(twitsModel.twits) { twit in
