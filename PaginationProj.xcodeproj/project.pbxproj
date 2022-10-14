@@ -67,10 +67,10 @@
 				1DC93B6528F46A250078DE16 /* TwitsListView.swift */,
 				1DC93B7328F46B570078DE16 /* Twit.swift */,
 				1DC93B7728F46C930078DE16 /* TwitView.swift */,
-				1DC93B7128F46AF90078DE16 /* TwitsStorage.swift */,
 				1DC93B7D28F896D00078DE16 /* TwitsModel.swift */,
 				1DC93B7928F5C4010078DE16 /* URLComponentsExtension.swift */,
 				1DC93B7B28F5EEBF0078DE16 /* ActivityIndicatorView.swift */,
+				1DC93B7128F46AF90078DE16 /* TwitsStorage.swift */,
 				1DC93B6728F46A260078DE16 /* Assets.xcassets */,
 				1DC93B6928F46A260078DE16 /* Preview Content */,
 			);

@@ -1,18 +1,22 @@
 import SwiftUI
 
-class TwitsModel: ObservableObject {
-    enum DataFailures: Error {
+final class TwitsModel: ObservableObject, Decodable {
+
+    enum NetworkFailure: Error {
         case decodeError
         case fatchingError
     }
-    
-    let twitsStorage = TwitsStorge()
+
+    @Published var twits: [Twit] = []
+
+    @Published var isLoading = false
 
     var baseURLString = "https://api.twitter.com/2/tweets/search/recent"
     var bearerToken = "AAAAAAAAAAAAAAAAAAAAANU0iAEAAAAAYsEzi7qN4ePnKtIBcvtLxhdV9Yg%3Dd7yJp1S2pClfJNTs6baLnAm6X7qntTgLaw6DXNlafsTDdYsUo6"
     var baseParams = [
         "query": "from: ZelenskyyUa"
     ]
+    var nextToken = ""
     
     var maxResults = "10"
     var page = 0
@@ -20,16 +24,26 @@ class TwitsModel: ObservableObject {
 
 
     func loadNextPage() {
-        if twitsStorage.twits.count <= offset {
-            baseParams["pagination_token"] = twitsStorage.nextToken
-            baseParams["max_results"] = maxResults
-//            fetchContents()
+            fetchTwits() { result in
+                switch result {
+                case .success(let storage):
+                    if self.twits.count <= self.offset {
+                        self.baseParams["pagination_token"] = self.nextToken
+                        self.baseParams["max_results"] = self.maxResults
+                        self.twits += storage.twits
+                        self.page += 1
+                        self.nextToken = storage.nextToken
+                    }
+                case .failure(let error):
+                    print("\(error)")
+                    self.isLoading = false
+            }
         }
     }
 
     //MARK: Paggination
 
-    func fetchContents(completion: (Result<TwitsStorge, DataFailures>) -> Void) throws {
+    func fetchTwits(completion: @escaping (Result<TwitsModel, NetworkFailure>) -> Void) {
         guard var urlComponents = URLComponents(string: baseURLString) else { return }
         urlComponents.setQueryItems(with: baseParams)
         guard let contentsURL = urlComponents.url else { return }
@@ -38,37 +52,55 @@ class TwitsModel: ObservableObject {
         request.addValue("Bearer " + bearerToken, forHTTPHeaderField: "Authorization")
 
         URLSession.shared.dataTask(with: request) { data, response, _ in
-
             if let data = data,
                let response = response as? HTTPURLResponse {
                 print(response.statusCode)
                 do {
                     let decoder = JSONDecoder()
-                    let result = try decoder.decode(TwitsStorge.self, from: data)
+                    let result = try decoder.decode(TwitsModel.self, from: data)
                     completion(.success(result))
                 }
-                catch DataFailures.decodeFailure {
-                    print("Error")
+                catch {
+                    completion(.failure(NetworkFailure.decodeError))
                 }
                 return
-            } else {
-                completion(.failure(DataFailures.fatchingError))
             }
-
         }
         .resume()
     }
 
 
     init() {
-        try! fetchContents() { result in
+        fetchTwits() { [weak self] result in
             switch result {
             case .success(let storage):
-                twitsStorage.twits = storage.get().twits
+                self?.twits = storage.twits
+                self?.page += 1
+                self?.nextToken = storage.nextToken
+                self?.isLoading = true
             case .failure(let error):
                 print(error)
             }
         }
+    }
+
+    //MARK: Decoding TwitsModel
+
+    enum CodingKeys: String, CodingKey {
+        case twits = "data"
+        case meta
+    }
+
+    enum MetaKeys: String, CodingKey {
+        case nextToken = "next_token"
+    }
+
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        twits = try container.decode([Twit].self, forKey: .twits)
+        let metaContainer = try container.nestedContainer(keyedBy: MetaKeys.self, forKey: .meta)
+        nextToken = try metaContainer.decode(String.self, forKey: .nextToken)
     }
     
 }

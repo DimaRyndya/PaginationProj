@@ -10,10 +10,10 @@ struct TwitsListView: View {
                 if twitsModel.page == 0 {
                     ActivityIndicatorView()
                 }
-                ForEach(twitsModel.twitsStorage.twits) { twit in
+                ForEach(twitsModel.twits) { twit in
                     TwitView(twit: twit)
                 }
-                if twitsModel.page != 0 {
+                if twitsModel.isLoading {
                     ActivityIndicatorView()
                         .onAppear {
                             twitsModel.loadNextPage()

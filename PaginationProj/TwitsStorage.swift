@@ -1,32 +1,16 @@
-import SwiftUI
-
-final class TwitsStorge: Decodable, ObservableObject {
-
-    @Published var twits: [Twit] = []
-
-    var nextToken = ""
+//import SwiftUI
+//
+//final class TwitsStorge: Decodable, ObservableObject {
+//
+//
+//
+//    var nextToken = ""
 
     //MARK: Decoding TwitsStorage
 
-    enum CodingKeys: String, CodingKey {
-        case twits = "data"
-        case meta
-    }
 
-    enum MetaKeys: String, CodingKey {
-        case nextToken = "next_token"
-    }
-
-    init() {}
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        twits = try container.decode([Twit].self, forKey: .twits)
-        let metaContainer = try container.nestedContainer(keyedBy: MetaKeys.self, forKey: .meta)
-        nextToken = try metaContainer.decode(String.self, forKey: .nextToken)
-    }
-
-}
+//
+//}
 
 
 //            guard let data = data else {
